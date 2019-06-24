@@ -4,8 +4,11 @@ import (
 	"github.com/spidernest-go/logger"
 )
 
-func Remove(id uint64) error {
-	err := db.Collection("boards").Find(id).Delete()
+func Remove(id, tid uint64) error {
+	err := db.Collection("boards").
+		Find(id).
+		Where("track_id = ", tid).
+		Delete()
 	if err != nil {
 		logger.Error().
 			Err(err).
