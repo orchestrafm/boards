@@ -1,6 +1,6 @@
 CREATE TABLE `boards` (
     `track_id` INT(8) UNSIGNED NOT NULL,
-    `id` INT(8) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `id` INT(8) UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
     `date_created` DATETIME NOT NULL DEFAULT NOW(),
     `date_modified` DATETIME,
     `sha3` CHAR(512) NOT NULL,
