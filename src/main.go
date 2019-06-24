@@ -13,5 +13,5 @@ func main() {
 		Msg("MySQL Database could not be attached to.")
 	database.Synchronize()
 
-	routers.ListenAndServe()
+	routing.ListenAndServe()
 }
