@@ -30,4 +30,25 @@ func getBoard(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, b)
 }
+
+func getBoardsFromTrack(c echo.Context) error {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		logger.Error().
+			Err(err).
+			Msgf("Passed id parameter (%s) was not a valid number", c.Param("id"))
+
+		return c.JSON(http.StatusBadRequest, nil)
+	}
+
+	bs, err := database.SelectTrackID(id)
+	if err != nil {
+		logger.Error().
+			Err(err).
+			Msg(".")
+
+		c.JSON(http.StatusNotFound, bs)
+	}
+
+	return c.JSON(http.StatusOK, bs)
 }
