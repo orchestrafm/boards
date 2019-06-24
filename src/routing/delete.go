@@ -10,7 +10,18 @@ import (
 )
 
 func deleteBoard(c echo.Context) error {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	tid, err := strconv.ParseUint(c.Param("tid"), 10, 64)
+	if err != nil {
+		logger.Error().
+			Err(err).
+			Msg("Invalid Parameters for deleting a board.")
+
+		return c.JSON(http.StatusNotAcceptable, &struct {
+			Message string
+		}{
+			Message: "."})
+	}
+	bid, err := strconv.ParseUint(c.Param("bid"), 10, 64)
 	if err != nil {
 		logger.Error().
 			Err(err).
@@ -22,7 +33,7 @@ func deleteBoard(c echo.Context) error {
 			Message: "."})
 	}
 
-	err = database.Remove(id)
+	err = database.Remove(bid, tid)
 	if err != nil {
 		logger.Error().
 			Err(err).
