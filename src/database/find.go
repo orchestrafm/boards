@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"strconv"
 
 	"github.com/spidernest-go/logger"
 )
