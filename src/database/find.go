@@ -10,8 +10,8 @@ import (
 func SelectID(id uint64) (*Board, error) {
 	boards := db.Collection("boards")
 	rs := boards.Find(id)
-	t := *new(Board)
-	err := rs.One(&t)
+	b := *new(Board)
+	err := rs.One(&b)
 	if err != nil && err != sql.ErrNoRows {
 		logger.Error().
 			Err(err).
@@ -21,6 +21,6 @@ func SelectID(id uint64) (*Board, error) {
 	if err == sql.ErrNoRows {
 		return nil, err
 	} else {
-		return &t, nil
+		return &b, nil
 	}
 }
