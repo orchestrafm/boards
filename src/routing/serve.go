@@ -1,4 +1,4 @@
-package routers
+package routing
 
 import (
 	"github.com/spidernest-go/mux"

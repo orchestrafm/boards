@@ -1,10 +1,10 @@
-package routers
+package routing
 
 import (
 	"net/http"
 	"strconv"
 
-	"github.com/orchestrafm/profiles/src/database"
+	"github.com/orchestrafm/boards/src/database"
 	"github.com/spidernest-go/logger"
 	"github.com/spidernest-go/mux"
 )
