@@ -28,5 +28,6 @@ func getBoard(c echo.Context) error {
 		c.JSON(http.StatusNotFound, ErrGeneric)
 	}
 
-	return c.JSON(http.StatusOK, &b)
+	return c.JSON(http.StatusOK, b)
+}
 }
