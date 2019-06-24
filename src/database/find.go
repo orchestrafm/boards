@@ -24,3 +24,22 @@ func SelectID(id uint64) (*Board, error) {
 		return &b, nil
 	}
 }
+
+func SelectTrackID(id uint64) ([]*Board, error) {
+	var bs []*Board
+	boards := db.Collection("boards")
+	rs := boards.Find().Where("track_id = ", id)
+
+	err := rs.All(&bs)
+	if err != nil && err != sql.ErrNoRows {
+		logger.Error().
+			Err(err).
+			Msg("Bad parameters or database error.")
+	}
+
+	if err == sql.ErrNoRows {
+		return nil, err
+	} else {
+		return bs, nil
+	}
+}
