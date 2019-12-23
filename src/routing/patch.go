@@ -10,6 +10,19 @@ import (
 )
 
 func editBoard(c echo.Context) error {
+	// auth check
+	admin, auth := AuthorizationCheck(c)
+	if auth != true {
+		logger.Info().
+			Msg("user intent to create a update a board, but was unauthorized.")
+
+		return c.JSON(http.StatusUnauthorized, &struct {
+			Message string
+		}{
+			Message: "Insufficient Permissions."})
+	}
+
+	// data binding
 	b := new(database.Board)
 	if err := c.Bind(b); err != nil {
 		logger.Error().
@@ -19,34 +32,43 @@ func editBoard(c echo.Context) error {
 		return c.JSON(http.StatusNotAcceptable, &struct {
 			Message string
 		}{
-			Message: "Invalid or malformed music track data."})
+			Message: "Invalid or malformed board data."})
 	}
 
+	// validation
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		logger.Error().
 			Err(err).
-			Msg("Invalid Parameters for editing a track.")
+			Msg("Invalid Parameters for editing a board.")
 
 		return c.JSON(http.StatusNotAcceptable, &struct {
 			Message string
 		}{
-			Message: "Invalid or malformed music track data."})
+			Message: "Invalid or malformed board data."})
+	}
+
+	// update resource
+	if !admin {
+		return c.JSON(http.StatusUnauthorized, &struct {
+			Message string
+		}{
+			Message: "Not an Administrator."})
 	}
 	err = b.Edit(id)
 	if err != nil {
 		logger.Error().
 			Err(err).
-			Msg("Music Track could not be updated.")
+			Msg("Board could not be updated.")
 
 		return c.JSON(http.StatusNotAcceptable, &struct {
 			Message string
 		}{
-			Message: "Invalid or malformed music track data."})
+			Message: "Invalid or malformed board data."})
 	}
 
 	return c.JSON(http.StatusOK, &struct {
 		Message string
 	}{
-		Message: "Track edited successfully."})
+		Message: "Board edited successfully."})
 }

@@ -9,16 +9,23 @@ import (
 )
 
 func createBoard(c echo.Context) error {
+	if err := FullAuthCheck(c); err != nil {
+		logger.Info().
+			Msg("user intent to create a new board, but was unauthorized.")
+
+		return err
+	}
+
 	b := new(database.Board)
 	if err := c.Bind(b); err != nil {
 		logger.Error().
 			Err(err).
-			Msg("Invalid or malformed music track data.")
+			Msg("Invalid or malformed music board data.")
 
 		return c.JSON(http.StatusNotAcceptable, &struct {
 			Message string
 		}{
-			Message: "Music track data was invalid or malformed."})
+			Message: "Music board data was invalid or malformed."})
 	}
 
 	err := b.New()
@@ -26,7 +33,7 @@ func createBoard(c echo.Context) error {
 		return c.JSON(http.StatusNotAcceptable, &struct {
 			Message string
 		}{
-			Message: "Music track data did not get submitted to the database."})
+			Message: "Music board data did not get submitted to the database."})
 	}
 
 	return c.JSON(http.StatusOK, &struct {

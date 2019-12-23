@@ -10,6 +10,19 @@ import (
 )
 
 func deleteBoard(c echo.Context) error {
+	// auth check
+	admin, auth := AuthorizationCheck(c)
+	if auth != true {
+		logger.Info().
+			Msg("user intent to create a delete a board, but was unauthorized.")
+
+		return c.JSON(http.StatusUnauthorized, &struct {
+			Message string
+		}{
+			Message: "Insufficient Permissions."})
+	}
+
+	// board search
 	tid, err := strconv.ParseUint(c.Param("tid"), 10, 64)
 	if err != nil {
 		logger.Error().
@@ -33,6 +46,13 @@ func deleteBoard(c echo.Context) error {
 			Message: "."})
 	}
 
+	// remove board
+	if !admin {
+		return c.JSON(http.StatusUnauthorized, &struct {
+			Message string
+		}{
+			Message: "Not an Administrator."})
+	}
 	err = database.Remove(bid, tid)
 	if err != nil {
 		logger.Error().
