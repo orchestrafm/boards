@@ -57,7 +57,7 @@ func ListenAndServe() {
 	v0AuthReq.PUT("/board/:id", updateBoard)
 	v0AuthReq.PATCH("/board/:id", editBoard)
 	v0.GET("/board/track/:id", getBoardsFromTrack)
-	v0.GET("/board/hash/:hash", getBoardFromHash)
+	v0.GET("/board/sha3/:hash", getBoardFromHash)
 	v0AuthReq.DELETE("/board/:tid/:bid", deleteBoard)
 
 	r.Start(":5002")
