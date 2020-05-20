@@ -52,3 +52,18 @@ func getBoardsFromTrack(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, bs)
 }
+
+func getBoardFromHash(c echo.Context) error {
+	hash := c.Param("hash")
+
+	b, err := database.SelectByHash(hash)
+	if err != nil {
+		logger.Error().
+			Err(err).
+			Msg(".")
+
+		c.JSON(http.StatusNotFound, ErrGeneric)
+	}
+
+	return c.JSON(http.StatusOK, b)
+}
