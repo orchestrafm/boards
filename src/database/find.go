@@ -42,3 +42,22 @@ func SelectTrackID(id uint64) ([]*Board, error) {
 		return bs, nil
 	}
 }
+
+func SelectByHash(hash string) (*Board, error) {
+	var b *Board
+	boards := db.Collection("boards")
+	rs := boards.Find().Where("sha3 = ", hash)
+
+	err := rs.All(&b)
+	if err != nil && err != sql.ErrNoRows {
+		logger.Error().
+			Err(err).
+			Msg("Bad parameters or database error.")
+	}
+
+	if err == sql.ErrNoRows {
+		return nil, err
+	} else {
+		return b, nil
+	}
+}
