@@ -44,11 +44,11 @@ func SelectTrackID(id uint64) ([]*Board, error) {
 }
 
 func SelectByHash(hash string) (*Board, error) {
-	var b *Board
+	var b Board
 	boards := db.Collection("boards")
 	rs := boards.Find().Where("sha3 = ", hash)
 
-	err := rs.All(&b)
+	err := rs.One(&b)
 	if err != nil && err != sql.ErrNoRows {
 		logger.Error().
 			Err(err).
@@ -58,6 +58,6 @@ func SelectByHash(hash string) (*Board, error) {
 	if err == sql.ErrNoRows {
 		return nil, err
 	} else {
-		return b, nil
+		return &b, nil
 	}
 }
