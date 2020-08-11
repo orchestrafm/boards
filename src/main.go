@@ -8,10 +8,11 @@ import (
 
 func main() {
 	err := database.Connect()
-	logger.Error().
-		Err(err).
-		Msg("MySQL Database could not be attached to.")
-	database.Synchronize()
+	if err != nil {
 
+		logger.Error().
+			Err(err).
+			Msg("MySQL Database could not be attached to.")
+	}
 	routing.ListenAndServe()
 }
