@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/orchestrafm/boards/src/database"
+	"github.com/orchestrafm/boards/src/objstore"
 	"github.com/orchestrafm/boards/src/routing"
 	"github.com/spidernest-go/logger"
 )
@@ -14,5 +15,6 @@ func main() {
 			Err(err).
 			Msg("MySQL Database could not be attached to.")
 	}
+	objstore.Login()
 	routing.ListenAndServe()
 }
