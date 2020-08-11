@@ -2,8 +2,10 @@ package routing
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/orchestrafm/boards/src/database"
+	"github.com/orchestrafm/boards/src/objstore"
 	"github.com/spidernest-go/logger"
 	"github.com/spidernest-go/mux"
 )
@@ -31,7 +33,35 @@ func createBoard(c echo.Context) error {
 			Message: "Music board data was invalid or malformed."})
 	}
 
-	err := b.New()
+	f, err := decodeJacket(b.Jacket)
+	if err != nil {
+		logger.Error().
+			Err(err).
+			Msg("Upload failed at jacket decoding step.")
+
+		return c.JSON(http.StatusNotAcceptable, &struct {
+			Message string
+		}{
+			Message: "Music board data was invalid or malformed."})
+	}
+	defer f.Close()
+	defer os.Remove(f.Name())
+
+	fstat, _ := f.Stat() //HACK: I need a better, more semantic way of naming photos
+	url, err := objstore.Upload(f, "/Images/Effective/Pre-Season/"+fstat.Name(), "public-read", true)
+	if err != nil {
+		logger.Error().
+			Err(err).
+			Msg("Object Store rejected putting the object.")
+
+		return c.JSON(http.StatusNotAcceptable, &struct {
+			Message string
+		}{
+			Message: "File could not be commited to disk."})
+	}
+	b.Jacket = url
+
+	err = b.New()
 	if err != nil {
 		return c.JSON(http.StatusNotAcceptable, &struct {
 			Message string
