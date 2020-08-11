@@ -9,11 +9,14 @@ import (
 )
 
 func createBoard(c echo.Context) error {
-	if err := FullAuthCheck(c); err != nil {
+	if authorized := HasRole(c, "create-board"); authorized != true {
 		logger.Info().
 			Msg("user intent to create a new board, but was unauthorized.")
 
-		return err
+		return c.JSON(http.StatusUnauthorized, &struct {
+			Message string
+		}{
+			Message: ErrPermissions.Error()})
 	}
 
 	b := new(database.Board)

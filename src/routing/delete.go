@@ -11,7 +11,8 @@ import (
 
 func deleteBoard(c echo.Context) error {
 	// auth check
-	admin, auth := AuthorizationCheck(c)
+	admin := HasRole(c, "manage-boards")
+	auth := HasRole(c, "create-board")
 	if auth != true {
 		logger.Info().
 			Msg("user intent to create a delete a board, but was unauthorized.")
