@@ -1,0 +1,1 @@
+ALTER TABLE `boards` MODIFY `jacket` VARCHAR(512) NOT NULL;
