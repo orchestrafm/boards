@@ -23,6 +23,7 @@ func Upload(f *os.File, fname, acl string, cdn bool) (string, error) {
 		Key:    aws.String(fname),
 		Body:   bytes.NewReader(fbuf),
 		ACL:    aws.String(acl),
+		ContentType: aws.String("image/webp"),
 	})
 
 	if err != nil {
