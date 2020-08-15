@@ -10,7 +10,7 @@ func (b *Board) New() error {
 	b.DateCreated = time.Now()
 	b.DateModified = time.Unix(0, 0)
 	// TODO: Make sure something doesn't already exist in the spot [id, track_id]
-	_, err := db.InsertInto("boards").
+	res, err := db.InsertInto("boards").
 		Values(b).
 		Exec()
 
@@ -19,6 +19,8 @@ func (b *Board) New() error {
 			Err(err).
 			Msg("Music Track could not be inserted into the table.")
 	}
+	id, _ := res.LastInsertId()
 
+	b.ID = uint64(id)
 	return err
 }
