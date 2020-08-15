@@ -1,10 +1,9 @@
 package routing
 
 import (
+	"fmt"
 	"net/http"
 	"os"
-	"strconv"
-	"strings"
 
 	"github.com/orchestrafm/boards/src/database"
 	"github.com/orchestrafm/boards/src/objstore"
@@ -67,29 +66,20 @@ func createBoard(c echo.Context) error {
 	}
 	defer ff.Close()
 
-	// Upload to Object Storage
-	t, err := database.SelectTrackByID(b.TrackID)
+	// Push Database Entry
+	err = b.New()
 	if err != nil {
-		logger.Error().
-			Err(err).
-			Msg("Track with the specified ID wasn't found.")
-
-		return c.JSON(http.StatusNotFound, &struct {
+		return c.JSON(http.StatusNotAcceptable, &struct {
 			Message string
 		}{
-			Message: "No track exists with the specified ID."})
+			Message: "Music board data did not get submitted to the database."})
 	}
-	strbuf := *new(strings.Builder)
-	strbuf.WriteString(t.Title)
-	strbuf.WriteString(" ")
-	strbuf.WriteString(t.Artists)
-	strbuf.WriteString(" ")
-	strbuf.WriteString(strconv.Itoa(int(b.DifficultyRating)))
-	strbuf.WriteString(".webp")
-	fname := strbuf.String()
 
+	// Upload to Object Storage
+	fname := fmt.Sprint(b.ID) + ".webp"
 	url, err := objstore.Upload(ff, "/Images/Effective/Pre-Season/"+fname, "public-read", true)
 	if err != nil {
+		database.Remove(b.ID, b.TrackID)
 		logger.Error().
 			Err(err).
 			Msg("Object Store rejected putting the object.")
@@ -100,15 +90,6 @@ func createBoard(c echo.Context) error {
 			Message: "File could not be commited to disk."})
 	}
 	b.Jacket = url
-
-	// Push Database Entry
-	err = b.New()
-	if err != nil {
-		return c.JSON(http.StatusNotAcceptable, &struct {
-			Message string
-		}{
-			Message: "Music board data did not get submitted to the database."})
-	}
 
 	return c.JSON(http.StatusCreated, &struct {
 		Message string
