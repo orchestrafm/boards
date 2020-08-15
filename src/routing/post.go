@@ -3,6 +3,8 @@ package routing
 import (
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/orchestrafm/boards/src/database"
 	"github.com/orchestrafm/boards/src/objstore"
@@ -11,6 +13,7 @@ import (
 )
 
 func createBoard(c echo.Context) error {
+	// Check Authorization
 	if authorized := HasRole(c, "create-board"); authorized != true {
 		logger.Info().
 			Msg("user intent to create a new board, but was unauthorized.")
@@ -21,6 +24,7 @@ func createBoard(c echo.Context) error {
 			Message: ErrPermissions.Error()})
 	}
 
+	// Data Binding
 	b := new(database.Board)
 	if err := c.Bind(b); err != nil {
 		logger.Error().
@@ -33,6 +37,7 @@ func createBoard(c echo.Context) error {
 			Message: "Music board data was invalid or malformed."})
 	}
 
+	// Jacket Contents
 	f, err := decodeJacket(b.Jacket)
 	if err != nil {
 		logger.Error().
@@ -47,7 +52,6 @@ func createBoard(c echo.Context) error {
 	defer f.Close()
 	defer os.Remove(f.Name())
 
-	fstat, _ := f.Stat()         //HACK: I need a better, more semantic way of naming photos
 	ff, err := os.Open(f.Name()) //HACK: Go is fucking stupid and won't let me reuse
 	// the file pointer for what reason. Introducing yet
 	// another vector that could fail for any reason.
@@ -63,7 +67,28 @@ func createBoard(c echo.Context) error {
 	}
 	defer ff.Close()
 
-	url, err := objstore.Upload(ff, "/Images/Effective/Pre-Season/"+fstat.Name(), "public-read", true)
+	// Upload to Object Storage
+	t, err := database.SelectTrackByID(b.TrackID)
+	if err != nil {
+		logger.Error().
+			Err(err).
+			Msg("Track with the specified ID wasn't found.")
+
+		return c.JSON(http.StatusNotFound, &struct {
+			Message string
+		}{
+			Message: "No track exists with the specified ID."})
+	}
+	strbuf := *new(strings.Builder)
+	strbuf.WriteString(t.Title)
+	strbuf.WriteString(" ")
+	strbuf.WriteString(t.Artists)
+	strbuf.WriteString(" ")
+	strbuf.WriteString(strconv.Itoa(int(b.DifficultyRating)))
+	strbuf.WriteString(".webp")
+	fname := strbuf.String()
+
+	url, err := objstore.Upload(ff, "/Images/Effective/Pre-Season/"+fname, "public-read", true)
 	if err != nil {
 		logger.Error().
 			Err(err).
@@ -76,6 +101,7 @@ func createBoard(c echo.Context) error {
 	}
 	b.Jacket = url
 
+	// Push Database Entry
 	err = b.New()
 	if err != nil {
 		return c.JSON(http.StatusNotAcceptable, &struct {
@@ -84,7 +110,7 @@ func createBoard(c echo.Context) error {
 			Message: "Music board data did not get submitted to the database."})
 	}
 
-	return c.JSON(http.StatusOK, &struct {
+	return c.JSON(http.StatusCreated, &struct {
 		Message string
 	}{
 		Message: "OK."})
