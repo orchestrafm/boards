@@ -79,7 +79,7 @@ func createBoard(c echo.Context) error {
 	fname := fmt.Sprint(b.ID) + ".webp"
 	url, err := objstore.Upload(ff, "/Images/Effective/Pre-Season/"+fname, "public-read", true)
 	if err != nil {
-		database.Remove(b.ID, b.TrackID)
+		defer database.Remove(b.ID, b.TrackID)
 		logger.Error().
 			Err(err).
 			Msg("Object Store rejected putting the object.")
@@ -90,6 +90,16 @@ func createBoard(c echo.Context) error {
 			Message: "File could not be commited to disk."})
 	}
 	b.Jacket = url
+
+	// Update Database Entry
+	err = b.Update()
+	if err != nil {
+		defer database.Remove(b.ID, b.TrackID)
+		return c.JSON(http.StatusNotAcceptable, &struct {
+			Message string
+		}{
+			Message: "Music board data did not get submitted to the database."})
+	}
 
 	return c.JSON(http.StatusCreated, &struct {
 		Message string
