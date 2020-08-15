@@ -14,11 +14,12 @@ func Upload(f io.Reader, fname, acl string, cdn bool) (string, error) {
 	uploader := s3manager.NewUploader(session_)
 
 	out, err := uploader.Upload(&s3manager.UploadInput{
-		Bucket:      aws.String(os.Getenv("AWS_S3_BUCKET")),
-		Key:         aws.String(fname),
-		Body:        f,
-		ACL:         aws.String(acl),
-		ContentType: aws.String("image/webp"),
+		Bucket:          aws.String(os.Getenv("AWS_S3_BUCKET")),
+		Key:             aws.String(fname),
+		Body:            f,
+		ACL:             aws.String(acl),
+		ContentType:     aws.String("image/webp"),
+		ContentEncoding: aws.String("brotli"),
 	})
 
 	if err != nil {
