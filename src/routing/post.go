@@ -47,8 +47,23 @@ func createBoard(c echo.Context) error {
 	defer f.Close()
 	defer os.Remove(f.Name())
 
-	fstat, _ := f.Stat() //HACK: I need a better, more semantic way of naming photos
-	url, err := objstore.Upload(f, "/Images/Effective/Pre-Season/"+fstat.Name(), "public-read", true)
+	fstat, _ := f.Stat()         //HACK: I need a better, more semantic way of naming photos
+	ff, err := os.Open(f.Name()) //HACK: Go is fucking stupid and won't let me reuse
+	// the file pointer for what reason. Introducing yet
+	// another vector that could fail for any reason.
+	if err != nil {
+		logger.Error().
+			Err(err).
+			Msg("Opening image on local disk failed.")
+
+		return c.JSON(http.StatusInternalServerError, &struct {
+			Message string
+		}{
+			Message: "Image on disk was unreadable or unopenable."})
+	}
+	defer ff.Close()
+
+	url, err := objstore.Upload(ff, "/Images/Effective/Pre-Season/"+fstat.Name(), "public-read", true)
 	if err != nil {
 		logger.Error().
 			Err(err).
