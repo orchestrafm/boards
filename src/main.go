@@ -6,7 +6,7 @@ import (
 
 	"github.com/orchestrafm/boards/src/database"
 	"github.com/orchestrafm/boards/src/objstore"
-	"github.com/orchestrafm/boards/src/routing"
+	"github.com/orchestrafm/boards/src/routers"
 	"github.com/spidernest-go/logger"
 )
 
@@ -22,5 +22,5 @@ func main() {
 	}
 	database.Synchronize()
 	objstore.Login()
-	routing.ListenAndServe()
+	routers.ListenAndServe()
 }
