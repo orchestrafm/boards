@@ -67,6 +67,7 @@ func createBoard(c echo.Context) error {
 	defer ff.Close()
 
 	// Push Database Entry
+	b.Jacket = "" // clear this because a URL will fill it's spot
 	err = b.New()
 	if err != nil {
 		return c.JSON(http.StatusNotAcceptable, &struct {
