@@ -1,7 +1,7 @@
 package objstore
 
 import (
-	"bytes"
+	"io"
 	"os"
 	"strings"
 
@@ -10,19 +10,14 @@ import (
 	"github.com/spidernest-go/logger"
 )
 
-func Upload(f *os.File, fname, acl string, cdn bool) (string, error) {
+func Upload(f io.Reader, fname, acl string, cdn bool) (string, error) {
 	uploader := s3manager.NewUploader(session_)
 
-	finfo, _ := f.Stat()
-	fsize := finfo.Size()
-	fbuf := make([]byte, fsize)
-	f.Read(fbuf)
-
 	out, err := uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(os.Getenv("AWS_S3_BUCKET")),
-		Key:    aws.String(fname),
-		Body:   bytes.NewReader(fbuf),
-		ACL:    aws.String(acl),
+		Bucket:      aws.String(os.Getenv("AWS_S3_BUCKET")),
+		Key:         aws.String(fname),
+		Body:        f,
+		ACL:         aws.String(acl),
 		ContentType: aws.String("image/webp"),
 	})
 
