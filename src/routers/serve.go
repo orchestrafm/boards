@@ -40,6 +40,7 @@ func ListenAndServe() {
 
 	// route apis and start http multiplexer
 	r = echo.New()
+	r.Use(middleware.Recover())
 
 	v0 := r.Group("/api/v0")
 	v0AuthReq := v0.Group("", middleware.JWTWithConfig(middleware.JWTConfig{
